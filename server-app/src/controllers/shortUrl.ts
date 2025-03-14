@@ -45,10 +45,37 @@ export const getAllUrl = async (
 export const getUrl = async (
     req: express.Request,
     res: express.Response
-) => {};
+) => {
+    try {
+        const shortUrl =await urlModel.findOne({shortUrl: req.params.id})
+        if(!shortUrl){
+            res.status(404)
+            res.send({message: "Full Url not found"})
+        }else{
+            shortUrl.clicks++
+            shortUrl.save()
+            res.redirect(`${shortUrl.fullUrl}`)
+        }
+    } catch (error) {
+        res.status(500).send({"message": "Internal Server Error"})
+    }
+
+    
+    
+};
   
 export const deleteUrl = async (
     req: express.Request,
     res: express.Response
-) => {};  
+) => {
+    try {
+        const shortUrl =await urlModel.findByIdAndDelete({_id: req.params.id})
+        if(shortUrl){
+            res.status(200)
+            res.send({message: "Requested url is deleted"})
+        }
+    } catch (error) {
+        res.status(500).send({"message": "Internal Server Error"})
+    }
+};  
   

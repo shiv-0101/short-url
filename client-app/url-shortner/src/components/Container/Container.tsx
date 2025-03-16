@@ -9,22 +9,34 @@ interface IContainerProps {}
 
 const Container: React.FC<IContainerProps> = () => {
   const [data, setData] = React.useState<UrlData[]>([]);
+  const [reload, setReload] = React.useState<boolean>(false);
+
+  const updateReloadState = (): void => {
+    setReload(true);
+  }
 
   const fetchTableData = async () => {
     const response = await axios.get(`${serverUrl}/shortUrl`);
-    console.log("Respone from server is: ", response);
-    setData(response.data);
-}
+    console.log("Response from server is: ", response);
+    const sortedData = response.data.sort((a: UrlData, b: UrlData) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    setData(sortedData);
+    setReload(false);
+  }
 
-React.useEffect(() => {
+  React.useEffect(() => {
+    if (reload) {
+      fetchTableData();
+    }
+  }, [reload]);
+
+  React.useEffect(() => {
     fetchTableData();
-}, []);
+  }, []);
 
-
-    return (
+  return (
     <>
-    <FormContainer/>
-    <DataTable  data={data}/>
+      <FormContainer updateReloadState={updateReloadState} />
+      <DataTable updateReloadState={updateReloadState} data={data} />
     </>
   );
 };

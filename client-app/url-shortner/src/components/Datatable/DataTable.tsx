@@ -6,10 +6,11 @@ import axios from 'axios';
 
 interface IDataTableProps {
     data: UrlData[]
+    updateReloadState: () => void;
 }
 
 const DataTable: React.FC<IDataTableProps> = (props) => {
-    const { data } = props;
+    const { data, updateReloadState } = props;
     console.log("Data in DataTable:", data);
     const renderTableData = () => { 
         return data.map((item) => (
@@ -28,7 +29,7 @@ const DataTable: React.FC<IDataTableProps> = (props) => {
             </Link>
           </td>            
           <td className="px-6 py-4">{item.clicks}</td>
-            <td className="px-6 py-4">
+          <td className="px-6 py-4">
             <div className='flex content-center'>
                 <div className='cursor-pointer px-2' onClick={() => copyToClipboard(item.shortUrl)}>
               <svg
@@ -68,19 +69,22 @@ const DataTable: React.FC<IDataTableProps> = (props) => {
           </tr>
         ));
     }
-    const copyToClipboard = async (url:string) => {
+    const copyToClipboard = async (url: string) => {
         try {
             await navigator.clipboard.writeText(`${serverUrl}/shortUrl/${url}`);
             alert('Copied to clipboard');
         } catch (error) {
             console.log(error);
         }
-        
     }
-    const deleteUrl = async (id:string) => {
-      const response = await axios.delete(`${serverUrl}/shortUrl/${id}`);
-        console.log(response);
-       
+    const deleteUrl = async (id: string) => {
+        try {
+            const response = await axios.delete(`${serverUrl}/shortUrl/${id}`);
+            console.log(response);
+            updateReloadState();
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     return (
